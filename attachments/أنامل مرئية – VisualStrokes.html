@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>أنامل مرئية – VisualStrokes</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#fbf6ea;--card:#fff;--tx:#2b2a33;--mu:#6b6a75;--pr:#2f6fd6;--ac:#f0a020;--ok:#2e9e5b;--er:#d64545;--bd:#e4dcc8}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1b1c22;--card:#25262e;--tx:#f1efe8;--mu:#a9a8b3;--pr:#6ea0ff;--ac:#f3b34c;--ok:#5cc88a;--er:#ff7a7a;--bd:#3a3b46}}
+:root[data-theme=dark]{--bg:#1b1c22;--card:#25262e;--tx:#f1efe8;--mu:#a9a8b3;--pr:#6ea0ff;--ac:#f3b34c;--ok:#5cc88a;--er:#ff7a7a;--bd:#3a3b46}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:20px/1.9 Tahoma,"Segoe UI",Arial,sans-serif;letter-spacing:.02em;word-spacing:.12em}
+main{max-width:760px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:2px solid var(--bd);border-radius:18px;padding:16px;margin:12px 0}
+h1{font-size:28px;margin:6px 0}h2{font-size:22px;margin:4px 0}
+input,textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:2px solid var(--bd);background:var(--bg);color:var(--tx);margin:6px 0}
+button{font:inherit;border:0;border-radius:12px;padding:8px 16px;margin:4px;background:var(--pr);color:#fff;cursor:pointer}
+button.s{background:var(--card);color:var(--tx);border:2px solid var(--bd)}button.on{background:var(--ac);color:#222}button.d{background:var(--er)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px}.mu{color:var(--mu);font-size:16px}
+.sc{display:flex;gap:12px;align-items:center}.ok{color:var(--ok)}.er{color:var(--er)}
+.bar{height:14px;border-radius:7px;background:var(--bd);overflow:hidden;margin:2px 0 10px}.bar i{display:block;height:100%;background:var(--ok)}
+canvas{width:100%;max-width:340px;aspect-ratio:4/3;background:#fff;border:2px solid var(--bd);border-radius:14px;touch-action:none}
+img.dr{width:110px;border-radius:10px;border:2px solid var(--bd);margin:3px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.bub{padding:8px 14px;border-radius:16px;margin:6px 0;white-space:pre-wrap;max-width:88%}.bub.u{background:var(--pr);color:#fff}.bub.a{background:var(--bg);border:2px solid var(--bd)}
+.blk{font-size:36px;min-width:64px;padding:6px 10px}.slot{display:inline-block;min-width:56px;border-bottom:4px solid var(--ac);font-size:44px;text-align:center;margin:0 4px}
+.cd{font-size:44px;width:84px;height:84px;padding:0}.cd.dn{background:var(--ok);color:#fff;border:0}.mic{font-size:34px;padding:6px 18px;background:var(--ac);color:#222}
+#t{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 16px;border-radius:20px;font-size:16px;display:none}
+</style>
+</head>
+<body>
+<main id="app"></main><div id="t"></div>
+<script>
+const $=s=>document.querySelector(s),A=$('#app');
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){const t=$('#t');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+const REF='اسأل معلمك، ليس من حقي الإجابة عن ذلك';
+const DEF=['العنف والأسلحة والدم','المحتوى الجنسي والعلاقات العاطفية','المخدرات والتدخين والكحول','السياسة والخلافات بين الدول','النقاش في الأديان والمذاهب','السحر والخرافات المخيفة','أي موضوع مخيف أو مؤذٍ للأطفال','طلب معلومات شخصية أو عنوان أو صور','كل ما يخالف قيم المجتمع الكويتي وتعليم الأطفال'];
+let mem=null;
+function load(){try{const r=localStorage.getItem('vs_db');if(r)return JSON.parse(r)}catch(e){}return mem||{sup:null,users:{}}}
+let db=load();db.rules=db.rules||DEF;db.logs=db.logs||[];
+function save(){mem=db;try{localStorage.setItem('vs_db',JSON.stringify(db))}catch(e){toast('تعذّر الحفظ في هذا المتصفح')}}
+async function H(pw,salt){const e=new TextEncoder(),k=await crypto.subtle.importKey('raw',e.encode(pw),'PBKDF2',false,['deriveBits']);const b=await crypto.subtle.deriveBits({name:'PBKDF2',salt:e.encode(salt),iterations:100000,hash:'SHA-256'},k,256);return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const rs=()=>[...crypto.getRandomValues(new Uint8Array(8))].map(x=>x.toString(16)).join('');
+let me=null,tab='chat',lt='stu',busy=false,opn=null,delc=null,comp='salem',chat=[],nsh=null,tl=null,idea0='',par=false,gm='blk',bk=null,mt=null,col='#222',dr=false;
+const newData=()=>({quiz:{},draws:[],nash:[],photos:[]});
+const acc=u=>{let o=0,e=0;for(const l in u.data.quiz){o+=u.data.quiz[l].ok;e+=u.data.quiz[l].err}return o+e?Math.round(100*o/(o+e)):null};
+
+/* ---------- الشخصيات ---------- */
+const flag=(x,y)=>`<line x1="${x}" y1="52" x2="${x}" y2="100" stroke="#8a6a3a" stroke-width="2"/><rect x="${x}" y="54" width="26" height="5.5" fill="#007a3d"/><rect x="${x}" y="59.5" width="26" height="5.5" fill="#fff"/><rect x="${x}" y="65" width="26" height="5.5" fill="#ce1126"/><polygon points="${x},54 ${x+8},59.5 ${x+8},65 ${x},70.5" fill="#000"/>`;
+const C={salem:{n:'سالم',s:`<rect x="28" y="62" width="44" height="52" rx="10" fill="#fff" stroke="#bbb"/><circle cx="50" cy="40" r="19" fill="#f1c9a0"/><path d="M27 40Q50 4 73 40L73 50Q50 28 27 50Z" fill="#fff" stroke="#bbb"/><circle cx="43" cy="42" r="2.5" fill="#222"/><circle cx="57" cy="42" r="2.5" fill="#222"/><path d="M43 50Q50 56 57 50" stroke="#222" fill="none" stroke-width="2"/>${flag(76)}`},
+dana:{n:'دانة',s:`<circle cx="50" cy="38" r="26" fill="#3a2a20"/><path d="M30 66H70L78 114H22Z" fill="#e86aa0"/><circle cx="50" cy="42" r="18" fill="#f1c9a0"/><circle cx="43" cy="43" r="2.5" fill="#222"/><circle cx="57" cy="43" r="2.5" fill="#222"/><path d="M43 51Q50 57 57 51" stroke="#222" fill="none" stroke-width="2"/><circle cx="30" cy="24" r="6" fill="#f0a020"/>${flag(0)}`}};
+const av=(k,s)=>`<svg viewBox="-2 0 104 120" width="${s}" height="${s*1.15}" aria-label="${C[k].n}">${C[k].s}</svg>`;
+
+/* ---------- الذكاء الاصطناعي ---------- */
+const SYS=()=>`أنت «${C[comp].n}» رفيق تعلّم لطفل كويتي عمره 6 إلى 10 سنوات لديه صعوبات في القراءة. تكلّم بجمل قصيرة جدًا وبسيطة ومشجعة وصبورة، وردودك تُقرأ بصوت عالٍ لطفل لا يقرأ، فاجعلها جملتين قصيرتين سهلتي النطق بلا رموز أو إيموجي، دون انتقاد أو لوم، ودون ذكر أي تشخيص. إذا سأل عن حرف أو كلمة فاقترح طريقة حركية لتعلّمها (رسمها بعيدان أو بحبات فاكهة أو على الرمل أو بالصلصال أو في الهواء) ولا تربط الحروف بصور رمزية غير منطقية. لا تجب أبدًا عن موضوع من هذه المحاذير أو عن أي شيء يرفضه تعليم الأطفال أو المجتمع الكويتي: ${db.rules.join('، ')}. وفي هذه الحالة أجب بهذه الجملة فقط حرفيًا: «${REF}».`;
+async function ask(p){try{const s=await claude.use('sample');if(!s)return null;const r=await s(p,{cache:false});return(r.text||'').trim()}catch(e){return null}}
+function log(q){db.logs.push({u:me.name,q:q.slice(0,80),t:Date.now()});db.logs=db.logs.slice(-50);save()}
+async function send(){const q=$('#q').value.trim();if(!q||busy)return;chat.push({r:'u',t:q});busy=true;stuView();
+const h=chat.slice(-7).map(m=>(m.r=='u'?'الطفل: ':'أنت: ')+m.t).join('\n');
+let a=await ask(SYS()+'\n\n'+h+'\nأنت:');if(a==null){a=localChat(q);toast('الذكاء الاصطناعي غير متاح هنا، رد محلي بسيط')}
+if(a.includes('ليس من حقي'))log(q);chat.push({r:'a',t:a});busy=false;stuView();say(a)}
+async function nash(){const x=$('#nx').value.trim();if(x.length<2)return toast('اكتب ما يصعب عليك');busy=true;nsh=null;stuView();
+let a=await ask(SYS()+`\nمهمتك: ألّف أنشودة من 4 أسطر قصيرة مسجوعة بإيقاع ممتع يُردَّد بالتصفيق دون موسيقى، لمساعدة الطفل على تذكّر: «${x}». كلمات بسيطة جدًا، كل سطر في سطر، دون ترقيم أو شرح.`);
+busy=false;if(a==null){a=localNash(x);toast('الذكاء الاصطناعي غير متاح هنا، أنشودة محلية بسيطة')}if(a.includes('ليس من حقي')){log(x);nsh=[REF];say(REF)}else{nsh=a.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,6);const d=db.users[me.name].data;d.nash.push({t:Date.now(),x:x.slice(0,40)});save();say(nsh.join('. '))}stuView()}
+const STOP=['موضوع','الأطفال','تعليم','المجتمع','الكويتي','يخالف','معلومات','شخصية','عنوان','مخيف','مؤذٍ'];
+function banned(q){return db.rules.some(r=>r.split(/[\s،,]+/).some(w=>w.length>=4&&!STOP.includes(w)&&q.includes(w.replace(/^ال/,''))))}
+function localChat(q){if(banned(q))return REF;const l=[...q].reverse().find(c=>LET.includes(c));return l?`حرف «${l}»! دعنا نحضر ${MAT[Math.floor(Math.random()*MAT.length)]} ونرسمه معًا. جرّب قسم أرسم الحرف.`:'سؤال جميل! اسألني عن حرف أو كلمة، وسأقترح عليك طريقة ممتعة لتتعلمها.'}
+function localNash(x){return banned(x)?REF:`${x}، ${x}، نردّدها معًا\nنصفّق ونغنّي ونتعلّم\nكل يوم نتقدّم\nأنا أقدر وأنا أتقدّم`}
+function say(t){try{const u=new SpeechSynthesisUtterance(t);u.lang='ar';u.rate=.75;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){toast('القراءة الصوتية غير متاحة')}}
+const rec=(l,ok)=>{const q=db.users[me.name].data.quiz,x=q[l]=q[l]||{ok:0,err:0};ok?x.ok++:x.err++;save()};
+
+/* ---------- الدخول ---------- */
+function loginView(msg){
+A.innerHTML=`<div class="card" style="text-align:center"><h1>🖐️ أنامل مرئية</h1><div class="mu">VisualStrokes – تعلّم متعدد الحواس بالذكاء الاصطناعي</div>${av('salem',70)} ${av('dana',70)}</div>
+<div class="tabs"><button class="${lt=='stu'?'on':'s'}" onclick="lt='stu';loginView()">دخول الطالب</button><button class="${lt=='sup'?'on':'s'}" onclick="lt='sup';loginView()">دخول المشرف</button></div>
+<div class="card"><h2>${lt=='stu'?'الطالب':db.sup?'المشرف':'إنشاء حساب المشرف (لمرة واحدة)'}</h2>
+<input id="n" placeholder="${lt=='stu'?'اسم مستعار (لا تكتب الاسم الكامل)':'اسم المشرف'}" autocomplete="off"><input id="p" type="password" placeholder="كلمة المرور (4 أحرف على الأقل)">
+<div class="er">${msg||''}</div>
+${lt=='stu'?'<button onclick="doLogin()">دخول</button><button class="s" onclick="doReg()">حساب جديد</button>':db.sup?'<button onclick="doSup()">دخول المشرف</button>':'<button onclick="doSup(1)">إنشاء الحساب</button>'}
+<p class="mu">🔒 كلمات المرور مشفّرة ولا تُخزَّن كنص. بيانات كل طالب لا يراها إلا هو والمشرف. لا تُدخل بيانات حقيقية للأطفال دون موافقة ولي الأمر.</p></div>`}
+const val=()=>[$('#n').value.trim(),$('#p').value];
+async function doReg(){const[n,p]=val();if(!n||p.length<4)return loginView('أدخل اسمًا وكلمة مرور (4 أحرف على الأقل)');if(db.users[n])return loginView('الاسم مستخدم، اختر اسمًا آخر');const s=rs();db.users[n]={salt:s,hash:await H(p,s),data:newData(),created:Date.now()};save();me={role:'stu',name:n};tab='chat';render()}
+async function doLogin(){const[n,p]=val(),u=db.users[n];if(!u||await H(p,u.salt)!==u.hash)return loginView('الاسم أو كلمة المرور غير صحيحة');me={role:'stu',name:n};tab='chat';render()}
+async function doSup(c){const[n,p]=val();if(c){if(!n||p.length<4)return loginView('أدخل اسم المشرف وكلمة مرور (4 أحرف على الأقل)');const s=rs();db.sup={name:n,salt:s,hash:await H(p,s)};save();me={role:'sup',name:n};return render()}
+if(n!==db.sup.name||await H(p,db.sup.salt)!==db.sup.hash)return loginView('بيانات المشرف غير صحيحة');me={role:'sup',name:n};render()}
+function out(){me=null;chat=[];nsh=null;par=false;opn=null;loginView()}
+function render(){me.role=='stu'?stuView():supView()}
+
+/* ---------- الطالب ---------- */
+const LET=[...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي'],MAT=['عيدان','حبات فاكهة','أرز على صينية','صلصال','خيط','دقيق على صينية','رمل'];
+const W=['جمل','باب','تين','شمس','سمك','خبز','ورد','نجم'],FM={'ج':'جـ','ح':'حـ','خ':'خـ','ب':'بـ','ت':'تـ','ث':'ثـ','س':'سـ','ش':'شـ'};
+function stuView(){
+const u=db.users[me.name],d=u.data;d.nash=d.nash||[];d.photos=d.photos||[];d.draws=d.draws||[];
+const T=[['chat','💬 اسأل '+C[comp].n],['nashid','🎵 أنشودة'],['trace','✏️ أرسم الحرف'],['play','🧩 ألعب'],['prog','⭐ إنجازاتي']];
+let b='';
+if(tab=='chat')b=`<div class="card sc">${av(comp,70)}<div><button class="${comp=='salem'?'on':'s'}" onclick="comp='salem';chat=[];stuView()">سالم</button><button class="${comp=='dana'?'on':'s'}" onclick="comp='dana';chat=[];stuView()">دانة</button><div class="mu">اسألني عن الحروف والكلمات والدروس</div></div></div>
+<div class="card"><div class="bub a">أهلًا ${esc(me.name)}! أنا ${C[comp].n}. ماذا نتعلّم اليوم؟ <button class="s" onclick="say(VO.chat())">🔊</button></div>${chat.map(m=>`<div class="bub ${m.r}">${esc(m.t)}</div>`).join('')}${busy?'<div class="mu">أفكّر...</div>':''}<div style="text-align:center"><button class="mic" onclick="mic(t=>{$('#q').value=t;send()})">🎤 تكلّم</button></div><input id="q" placeholder="أو اكتب سؤالك (للأهل)" onkeydown="if(event.key=='Enter')send()"><button class="s" onclick="send()">إرسال</button></div>`;
+if(tab=='nashid')b=`<div class="card"><h2>ما الذي يصعب عليك؟</h2><input id="nx" placeholder="حرف أو كلمة أو درس، مثل: حرف الخاء" value=""><button class="mic" onclick="mic(t=>{$('#nx').value=t;nash()})">🎤 تكلّم</button><button class="s" onclick="nash()" ${busy?'disabled':''}>${busy?'أؤلّف...':'🎵 ألّف لي أنشودة'}</button></div>`+(nsh?`<div class="card sc">${av(comp,70)}<div>${nsh.map(l=>`<div>${esc(l)}</div>`).join('')}<button class="s" onclick="say(nsh.join('. '))">🔊 اسمعها</button><div class="mu">👏 رددها مع التصفيق!</div></div></div>`:'');
+if(tab=='trace'){b=`<div class="card"><h2>اختر حرفًا</h2><div>${LET.map(l=>`<button class="${tl==l?'on':'s'}" style="width:52px;padding:4px" onclick="tl='${l}';idea();stuView();say(idea0)">${l}</button>`).join('')}</div></div>`;
+if(tl)b+=`<div class="card"><div class="sc">${av(comp,56)}<div><b>${esc(idea0)}</b> <button class="s" onclick="idea();stuView();say(idea0)">🔄 فكرة أخرى</button></div></div><canvas id="cv" width="340" height="255"></canvas><div>${['#222','#d64545','#2f6fd6','#2e9e5b','#f0a020'].map(c=>`<button style="background:${c};width:42px;height:42px" onclick="col='${c}'"></button>`).join('')}<button class="s" onclick="initCv()">مسح</button><button onclick="sv()">💾 حفظ</button><button class="s" onclick="say(tl)">🔊</button></div></div>`}
+if(tab=='play')b=`<div class="tabs"><button class="${gm=='blk'?'on':'s'}" onclick="gm='blk';bk=null;stuView()">🧱 مكعبات الكلمات</button><button class="${gm=='mat'?'on':'s'}" onclick="gm='mat';mt=null;stuView()">🃏 لعبة المقارنة</button></div>`+(gm=='blk'?blkV():matV());
+if(tab=='prog'){const a=acc(u);b=`<div class="card"><h2>إنجازاتي</h2><p>🎵 أناشيد: <b>${d.nash.length}</b> · ✏️ رسومات: <b>${d.draws.length}</b> · 🎯 الدقة: <b>${a==null?'—':a+'%'}</b></p>${Object.keys(d.quiz).map(l=>{const x=d.quiz[l];return`<div>${l} <span class="mu">(${x.ok}✓ ${x.err}✗)</span><div class="bar"><i style="width:${100*x.ok/(x.ok+x.err||1)}%"></i></div></div>`}).join('')||'<div class="mu">العب لتظهر نتائجك.</div>'}</div>
+<div class="card"><h2>🏅 إنجاز اليوم الفني</h2><div class="mu">اطلب من أهلك تصوير أجمل حرف رسمته اليوم.</div>${d.photos.map(p=>`<div><img class="dr" src="${p.u}"> <b>${esc(p.l)}</b></div>`).join('')}${par?`<input id="cap" placeholder="الحرف الذي نتباهى به اليوم"><input type="file" accept="image/*" capture="environment" onchange="photo(this)">`:`<input id="gp" type="password" placeholder="كلمة المرور (للأهل فقط)"><button class="s" onclick="gate()">📷 قسم الأهل</button>`}</div>`}
+A.innerHTML=`<div class="top"><h2>أهلًا ${esc(me.name)} 👋</h2><button class="s" onclick="out()">خروج</button></div><div class="tabs">${T.map(t=>`<button class="${tab==t[0]?'on':'s'}" onclick="go('${t[0]}')">${t[1]}</button>`).join('')}</div>${b}`;
+if(tab=='trace'&&tl)initCv()}
+const VO={chat:()=>`أهلًا ${me.name}، أنا ${C[comp].n}. اضغط على الميكروفون وتكلّم معي`,nashid:()=>'قل لي ما الذي يصعب عليك، وسأؤلّف لك أنشودة',trace:()=>'اختر حرفًا، ثم تتبّع شكله بإصبعك',play:()=>'هيا نلعب! اختر لعبة',prog:()=>'هذه إنجازاتك، أنت رائع'};
+function go(x){tab=x;par=false;stuView();say(VO[x]())}
+function mic(cb){const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R)return toast('الميكروفون غير مدعوم هنا، اكتب بدلًا منه');const r=new R();r.lang='ar-KW';r.onresult=e=>cb(e.results[0][0].transcript);r.onerror=()=>toast('لم أسمعك، حاول مرة أخرى');r.start();toast('🎤 تكلّم الآن...')}
+function idea(){idea0=`دعنا نحضر ${MAT[Math.floor(Math.random()*MAT.length)]} ونرسم حرف «${tl}»`}
+function initCv(){const c=$('#cv'),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,340,255);x.fillStyle='rgba(120,120,120,.25)';x.font='bold 210px Tahoma,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(tl,170,130);x.lineWidth=6;x.lineCap='round';
+const p=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*340/r.width,(e.clientY-r.top)*255/r.height]};
+c.onpointerdown=e=>{dr=true;const[a,b]=p(e);x.strokeStyle=col;x.beginPath();x.moveTo(a,b);c.setPointerCapture(e.pointerId)};
+c.onpointermove=e=>{if(!dr)return;const[a,b]=p(e);x.lineTo(a,b);x.stroke()};c.onpointerup=()=>dr=false}
+function sv(){const d=db.users[me.name].data;d.draws.push({t:Date.now(),l:tl,u:$('#cv').toDataURL('image/jpeg',.5)});d.draws=d.draws.slice(-8);save();toast('تم حفظ رسمتك 🎨')}
+async function gate(){const u=db.users[me.name];if(await H($('#gp').value,u.salt)!==u.hash)return toast('كلمة المرور غير صحيحة');par=true;stuView()}
+function photo(f){const file=f.files[0];if(!file)return;const im=new Image();im.onload=()=>{const k=Math.min(1,320/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);const d=db.users[me.name].data;d.photos.push({t:Date.now(),l:($('#cap').value||'حرف اليوم').slice(0,30),u:c.toDataURL('image/jpeg',.6)});d.photos=d.photos.slice(-6);save();par=false;toast('تم حفظ الإنجاز 🏅');stuView()};im.src=URL.createObjectURL(file)}
+
+/* ---------- الألعاب ---------- */
+function blkV(){if(!bk){const w=W[Math.floor(Math.random()*W.length)];bk={w,p:'',res:0,pool:[...w].map((l,i)=>({l,u:0})).sort(()=>Math.random()-.5)}}
+return`<div class="card" style="text-align:center"><h2>استمع ثم رتّب الحروف</h2><button onclick="say(bk.w)">🔊 اسمع الكلمة</button><div dir="rtl" style="margin:10px">${[...bk.w].map((l,i)=>`<span class="slot">${bk.p[i]||'&nbsp;'}</span>`).join('')}</div><div>${bk.pool.map((c,i)=>`<button class="blk ${c.u?'s':''}" ${c.u?'disabled':''} onclick="pick(${i})">${c.l}</button>`).join('')}</div>${bk.res?`<h2 class="ok">أحسنت! ${bk.w} 🎉</h2><button onclick="bk=null;stuView()">كلمة جديدة ◀</button>`:''}</div>`}
+function pick(i){const c=bk.pool[i];if(c.u||bk.res)return;const need=bk.w[bk.p.length];if(c.l==need){c.u=1;bk.p+=c.l;rec(c.l,1);say(c.l);if(bk.p==bk.w){bk.res=1;say(bk.w)}}else{rec(need,0);toast('جرّب حرفًا آخر');say('جرّب حرفًا آخر')}stuView()}
+function matV(){if(!mt){const ls=Object.keys(FM).sort(()=>Math.random()-.5).slice(0,3);mt={f:[],c:ls.flatMap(l=>[{l,s:l,k:1},{l,s:FM[l],k:2}]).sort(()=>Math.random()-.5).map(x=>({...x,o:0,d:0}))}}
+const done=mt.c.every(c=>c.d);return`<div class="card" style="text-align:center"><h2>طابق الحرف مع شكله في أول الكلمة</h2>${mt.c.map((c,i)=>`<button class="cd ${c.d?'dn':c.o?'on':'s'}" onclick="flip(${i})">${c.o||c.d?c.s:'؟'}</button>`).join('')}${done?'<h2 class="ok">ممتاز! 🎉</h2><button onclick="mt=null;stuView()">لعبة جديدة ◀</button>':''}</div>`}
+function flip(i){const c=mt.c[i];if(c.o||c.d||mt.f.length>1)return;c.o=1;say(c.l);mt.f.push(c);if(mt.f.length==2){const[a,b]=mt.f;setTimeout(()=>{if(a.l==b.l&&a.k!=b.k){a.d=b.d=1;rec(a.l,1);say('أحسنت')}else{a.o=b.o=0;rec(a.l,0);rec(b.l,0)}mt.f=[];stuView()},800)}stuView()}
+
+/* ---------- المشرف ---------- */
+function supView(){
+const ns=Object.keys(db.users);
+A.innerHTML=`<div class="top"><h2>لوحة المشرف: ${esc(me.name)}</h2><button class="s" onclick="out()">خروج</button></div>
+<div class="card"><h2>الطلاب (${ns.length})</h2>${ns.map(n=>{const u=db.users[n],d=u.data,a=acc(u);return`<div style="border-top:2px solid var(--bd);padding:6px 0"><div class="top"><span><b>${esc(n)}</b> <span class="mu">رسومات ${(d.draws||[]).length} · أناشيد ${(d.nash||[]).length} · دقة ${a==null?'—':a+'%'}</span></span><button class="s" onclick="tgl(${JSON.stringify(n).replace(/"/g,'&quot;')})">تفاصيل</button></div>${opn===n?detail(n):''}</div>`}).join('')||'<div class="mu">لا يوجد طلاب بعد.</div>'}</div>
+<div class="card"><h2>🚫 قائمة المحاذير (سطر لكل بند)</h2><div class="mu">يرفض المساعد الإجابة عنها ويقول: «${REF}»</div><textarea id="rl" rows="8">${esc(db.rules.join('\n'))}</textarea><button onclick="svR()">حفظ القائمة</button><button class="s" onclick="db.rules=[...DEF];save();supView()">استرجاع الافتراضية</button></div>
+<div class="card"><h2>⚠️ أسئلة رفض المساعد الإجابة عنها</h2>${db.logs.slice(-10).reverse().map(l=>`<div class="mu">${esc(l.u)}: ${esc(l.q)}</div>`).join('')||'<div class="mu">لا يوجد.</div>'}</div>
+<div class="card"><h2>تغيير كلمة مرور المشرف</h2><input id="sp" type="password" placeholder="كلمة مرور جديدة"><button onclick="chS()">حفظ</button></div>`}
+function detail(n){const d=db.users[n].data,w=Object.keys(d.quiz).filter(l=>d.quiz[l].err).sort((a,b)=>d.quiz[b].err-d.quiz[a].err).slice(0,3);const q=JSON.stringify(n).replace(/"/g,'&quot;');
+return`<div class="mu">حروف تحتاج دعمًا: <b>${w.join(' ، ')||'لا شيء حتى الآن'}</b></div><div class="mu">ما طلبه في الأناشيد: ${(d.nash||[]).slice(-4).map(s=>esc(s.x)).join(' | ')||'—'}</div><div>${(d.draws||[]).map(x=>`<img class="dr" src="${x.u}">`).join('')}${(d.photos||[]).map(x=>`<img class="dr" src="${x.u}" title="${esc(x.l)}">`).join('')}</div><input id="rp" type="password" placeholder="كلمة مرور جديدة للطالب"><button onclick="rst(${q})">إعادة تعيين</button><button class="d" onclick="del(${q})">${delc===n?'تأكيد الحذف النهائي':'حذف الطالب وبياناته'}</button>`}
+function tgl(n){opn=opn===n?null:n;supView()}
+function svR(){db.rules=$('#rl').value.split('\n').map(s=>s.trim()).filter(Boolean);save();toast('تم حفظ القائمة')}
+async function rst(n){const p=$('#rp').value;if(p.length<4)return toast('4 أحرف على الأقل');const s=rs();db.users[n].salt=s;db.users[n].hash=await H(p,s);save();toast('تمت إعادة التعيين')}
+function del(n){if(delc!==n){delc=n;return supView()}delete db.users[n];delc=null;opn=null;save();supView()}
+async function chS(){const p=$('#sp').value;if(p.length<4)return toast('4 أحرف على الأقل');const s=rs();db.sup.salt=s;db.sup.hash=await H(p,s);save();toast('تم تغيير كلمة المرور')}
+loginView();
+</script>
+</body>
+</html>

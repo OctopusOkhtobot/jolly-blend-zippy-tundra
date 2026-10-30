@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Readex Pro", "Segoe UI", Tahoma, sans-serif;
+  --color-sand: #f3ecdf;
+  --color-paper: #fffaf3;
+  --color-ink: #1c2830;
+  --color-gulf: #0f6e62;
+  --color-gulf-ink: #f3fffb;
+  --color-clay: #c65a2e;
+  --color-clay-ink: #fff6f0;
+  --color-line: #e3d5c0;
+  --color-mist: #5c6b73;
+  --radius-card: 1.25rem;
+}
+
+@layer base {
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
+  body {
+    margin: 0;
+    background: var(--color-sand);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 1.125rem;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  button {
+    font: inherit;
+  }
+  input,
+  textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--color-ink);
+    background: var(--color-sand);
+    border: 2px solid var(--color-line);
+    border-radius: 0.9rem;
+    padding: 0.65rem 0.85rem;
+    min-height: 3rem;
+  }
+  textarea {
+    min-height: 7rem;
+    resize: vertical;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gulf);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

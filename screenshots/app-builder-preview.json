@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "صُقَيْر",
+      "hasCanvas": false,
+      "bodyTextLen": 560,
+      "bodyTextHash": "efc26fe0420b9f82d820e0cfa705c2b5793a12109bb5fc1ad6d452c56c346fab",
+      "bodyTextPrefix": "للعرض أمام اللجنة · نفس هذا الجهاز صُقَيْر صقر كويتي صغير لا يعل",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "صُقَيْر",
+      "hasCanvas": false,
+      "bodyTextLen": 560,
+      "bodyTextHash": "efc26fe0420b9f82d820e0cfa705c2b5793a12109bb5fc1ad6d452c56c346fab",
+      "bodyTextPrefix": "للعرض أمام اللجنة · نفس هذا الجهاز صُقَيْر صقر كويتي صغير لا يعل",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
